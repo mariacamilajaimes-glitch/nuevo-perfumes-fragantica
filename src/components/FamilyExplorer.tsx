@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CatalogFragrance, CATALOG, MainCategory } from '../data/fraganzaCatalog';
+import { getPerfumeBottlePhoto } from '../data/fragranceVisuals';
 import {
   Flower2,
   Citrus,
@@ -193,11 +194,12 @@ export const FamilyExplorer: React.FC<FamilyExplorerProps> = ({
                 onClick={() => onSelectFragrance(perfume)}
                 className="bg-[#0e0e0e] rounded-2xl border border-stone-800 hover:border-[#C9A84C]/40 transition-all p-5 flex flex-col justify-between space-y-4 shadow-xl cursor-pointer group"
               >
-                <div className="relative w-full h-52 rounded-xl overflow-hidden bg-black border border-stone-800">
+                <div className="relative w-full h-52 rounded-xl overflow-hidden bg-gradient-to-b from-stone-900 to-black border border-stone-800 p-2 flex items-center justify-center">
                   <img
-                    src={perfume.image}
+                    src={getPerfumeBottlePhoto(perfume.name, perfume.gender, perfume.image, perfume.code)}
                     alt={perfume.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
 

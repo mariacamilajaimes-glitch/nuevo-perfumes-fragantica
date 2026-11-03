@@ -56,47 +56,28 @@ export const ALL_UNIQUE_NOTES: string[] = (() => {
   return Array.from(notesSet).sort((a, b) => a.localeCompare(b));
 })();
 
-// Helper to find similar perfumes sharing at least 2 notes with STRICT gender matching
-export function findSimilarFragrances(target: CatalogFragrance, limit: number = 4): { fragrance: CatalogFragrance; sharedNotes: string[] }[] {
-  const isGenderCompatible = (f: CatalogFragrance) => {
-    if (target.gender === 'Dama') {
-      return f.gender === 'Dama' || f.gender === 'Unisex';
-    }
-    if (target.gender === 'Caballero') {
-      return f.gender === 'Caballero' || f.gender === 'Unisex';
-    }
-    return true;
-  };
+import {
+  computeWeightedJaccardSimilarity,
+  findSimilarFragrancesJaccard,
+  TieredJaccardResult
+} from './jaccardSimilarity';
 
-  const similarities = CATALOG
-    .filter(f => f.id !== target.id && isGenderCompatible(f))
-    .map(f => {
-      const fNotesLower = f.allNotes.map(n => n.toLowerCase());
-      const shared = target.allNotes.filter(n => fNotesLower.some(fn => fn.includes(n.toLowerCase()) || n.toLowerCase().includes(fn)));
-      return {
-        fragrance: f,
-        sharedNotes: shared,
-        score: shared.length * 2 + (f.mainCategory === target.mainCategory ? 3 : 0) + (f.intensity === target.intensity ? 1 : 0)
-      };
-    })
-    .filter(item => item.sharedNotes.length >= 2)
-    .sort((a, b) => b.score - a.score);
+// Re-export Weighted Jaccard Similarity functions and types
+export {
+  computeWeightedJaccardSimilarity,
+  findSimilarFragrancesJaccard,
+  type TieredJaccardResult
+};
 
-  // If less than limit, fallback to same family but STRICTLY honoring gender compatibility
-  if (similarities.length < limit) {
-    const existingIds = new Set(similarities.map(s => s.fragrance.id));
-    const fallback = CATALOG
-      .filter(f => f.id !== target.id && !existingIds.has(f.id) && isGenderCompatible(f) && f.mainCategory === target.mainCategory)
-      .map(f => ({
-        fragrance: f,
-        sharedNotes: target.allNotes.filter(n => f.allNotes.some(fn => fn.toLowerCase().includes(n.toLowerCase()))),
-        score: 1
-      }))
-      .slice(0, limit - similarities.length);
-    return [...similarities, ...fallback];
-  }
-
-  return similarities.slice(0, limit);
+// Helper to find similar perfumes using the Weighted Jaccard Similarity Engine
+export function findSimilarFragrances(target: CatalogFragrance, limit: number = 4): { fragrance: CatalogFragrance; sharedNotes: string[]; jaccardPercentage: number; result: TieredJaccardResult }[] {
+  const jaccardResults: TieredJaccardResult[] = findSimilarFragrancesJaccard(target, limit);
+  return jaccardResults.map((res: TieredJaccardResult) => ({
+    fragrance: res.fragrance,
+    sharedNotes: res.allSharedNotes,
+    jaccardPercentage: res.jaccardPercentage,
+    result: res
+  }));
 }
 
 // Occasion text generator for Question 8

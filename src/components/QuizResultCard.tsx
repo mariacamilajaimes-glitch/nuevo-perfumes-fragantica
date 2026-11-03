@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { CatalogFragrance, findSimilarFragrances, getOccasionDescription, getFullFragranceReview } from '../data/fraganzaCatalog';
+import {
+  CatalogFragrance,
+  findSimilarFragrancesJaccard,
+  TieredJaccardResult,
+  getOccasionDescription,
+  getFullFragranceReview
+} from '../data/fraganzaCatalog';
 import {
   getRealNotePhoto,
   computeFragranticaAccords,
@@ -15,7 +21,8 @@ import {
   RotateCcw,
   Compass,
   CheckCircle2,
-  Share2
+  Share2,
+  Calculator
 } from 'lucide-react';
 
 interface QuizResultCardProps {
@@ -41,8 +48,8 @@ export const QuizResultCard: React.FC<QuizResultCardProps> = ({
 }) => {
   const isFav = favorites.includes(winner.id);
 
-  // Similar perfumes (always visible, at least 2 notes in common)
-  const similarItems = findSimilarFragrances(winner, 4);
+  // Similar perfumes computed via Weighted Jaccard Similarity (Salida 25%, Corazón 35%, Fondo 40%)
+  const similarItems: TieredJaccardResult[] = findSimilarFragrancesJaccard(winner, 4);
 
   // Fragrantica Accords
   const mainAccords = computeFragranticaAccords(
@@ -60,7 +67,7 @@ export const QuizResultCard: React.FC<QuizResultCardProps> = ({
     textColor: '#1a1a1a'
   };
 
-  const bottlePhoto = getPerfumeBottlePhoto(winner.name, winner.gender, winner.image);
+  const bottlePhoto = getPerfumeBottlePhoto(winner.name, winner.gender, winner.image, winner.code);
 
   // Intensity meter values (Fragrantica style)
   const intensityLevels = [
@@ -413,40 +420,58 @@ export const QuizResultCard: React.FC<QuizResultCardProps> = ({
         </div>
       </div>
 
-      {/* PERFUMES SIMILARES (SIEMPRE VISIBLES - Mínimo 2 notas en común) */}
+      {/* PERFUMES SIMILARES: ALGORITMO JACCARD PONDERADO */}
       <div className="rounded-3xl bg-[#0c0c0c] border border-stone-800 p-6 sm:p-8 space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h3 className="text-xl font-bold font-serif-luxury text-stone-100 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[#F0D080]" />
-              Perfumes Similares (Mínimo 2 Notas Compartidas)
+              Perfumes Similares (Similitud Jaccard Ponderada)
             </h3>
             <p className="text-xs text-stone-400 mt-1">
-              Otras alternativas del catálogo Fraganza con afinidad olfativa directa a {winner.name}.
+              Alternativas calculadas ponderando afinidad en Salida (25%), Corazón (35%) y Fondo (40%).
             </p>
           </div>
-          <span className="text-xs font-mono text-[#F0D080] px-3 py-1 rounded-full bg-stone-900 border border-stone-800">
-            {similarItems.length} Similares
-          </span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-stone-900 border border-[#C9A84C]/40 text-xs font-mono text-[#F0D080] self-start sm:self-auto">
+            <Calculator className="w-3.5 h-3.5" />
+            <span>{similarItems.length} Similares</span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {similarItems.map(({ fragrance: sim, sharedNotes }) => {
-            const simBottle = getPerfumeBottlePhoto(sim.name, sim.gender, sim.image);
+          {similarItems.map(({ fragrance: sim, jaccardPercentage, sharedTopNotes, sharedHeartNotes, sharedBaseNotes, allSharedNotes }) => {
+            const simBottle = getPerfumeBottlePhoto(sim.name, sim.gender, sim.image, sim.code);
             return (
               <div
                 key={sim.id}
                 onClick={() => onSelectFragrance(sim)}
-                className="p-4 rounded-2xl bg-[#121212] border border-stone-800 hover:border-[#C9A84C]/60 cursor-pointer group transition-all flex flex-col justify-between space-y-3"
+                className="p-4 rounded-2xl bg-[#121212] border border-stone-800 hover:border-[#C9A84C]/60 cursor-pointer group transition-all flex flex-col justify-between space-y-3 relative overflow-hidden"
               >
-                <div className="relative aspect-square rounded-xl bg-black border border-stone-800 p-2 overflow-hidden flex items-center justify-center">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/80 text-[#F0D080] border border-stone-800 font-bold">
+                    {sim.code}
+                  </span>
+                  <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#1e1708] border border-[#C9A84C]/60 text-[11px] font-bold text-[#F0D080]">
+                    <Sparkles className="w-2.5 h-2.5 text-[#F0D080]" />
+                    <span>{jaccardPercentage}%</span>
+                  </div>
+                </div>
+
+                <div className="relative aspect-square rounded-xl bg-gradient-to-b from-stone-900 to-black border border-stone-800 p-2 overflow-hidden flex items-center justify-center">
                   <img
                     src={simBottle}
                     alt={sim.name}
-                    className="w-full h-full object-contain group-hover:scale-105 transition-transform"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-contain group-hover:scale-108 transition-transform duration-300"
                   />
-                  <span className="absolute top-2 left-2 text-[10px] font-mono px-2 py-0.5 rounded bg-black/80 text-[#F0D080] border border-stone-800 font-bold">
-                    {sim.code}
+                  <span className={`absolute bottom-1.5 right-1.5 text-[9px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider ${
+                    sim.gender === 'Dama'
+                      ? 'bg-rose-950/90 text-rose-200 border border-rose-800'
+                      : sim.gender === 'Caballero'
+                      ? 'bg-blue-950/90 text-blue-200 border border-blue-800'
+                      : 'bg-amber-950/90 text-amber-200 border border-amber-800'
+                  }`}>
+                    {sim.gender}
                   </span>
                 </div>
 
@@ -462,10 +487,21 @@ export const QuizResultCard: React.FC<QuizResultCardProps> = ({
                   </span>
                 </div>
 
-                <div className="pt-2 border-t border-stone-800/80">
-                  <span className="text-[10px] text-[#F0D080] block font-medium truncate">
-                    Comparte: {sharedNotes.slice(0, 2).join(', ')}
-                  </span>
+                <div className="w-full h-1 bg-stone-900 rounded-full overflow-hidden border border-stone-800">
+                  <div
+                    className="h-full bg-gradient-to-r from-[#C9A84C] to-[#F0D080] rounded-full"
+                    style={{ width: `${Math.min(100, Math.max(15, jaccardPercentage))}%` }}
+                  />
+                </div>
+
+                <div className="pt-2 border-t border-stone-800/80 space-y-0.5 text-[10px]">
+                  {allSharedNotes.length > 0 ? (
+                    <span className="text-[#F0D080] block font-medium truncate">
+                      Comparte: {allSharedNotes.slice(0, 3).join(', ')}
+                    </span>
+                  ) : (
+                    <span className="text-stone-500 italic block">Notas y acordes afines</span>
+                  )}
                 </div>
               </div>
             );

@@ -641,7 +641,7 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
                     perfume.intensity
                   );
                   const isFav = favorites.includes(perfume.id);
-                  const bottlePhoto = getPerfumeBottlePhoto(perfume.name, perfume.gender, perfume.image);
+                  const bottlePhoto = getPerfumeBottlePhoto(perfume.name, perfume.gender, perfume.image, perfume.code);
                   const brandCfg = BRAND_CONFIGS[perfume.brand] || {
                     label: perfume.brand.toUpperCase(),
                     fontClass: 'tracking-widest font-sans font-bold',
@@ -896,7 +896,7 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
           {textSuggestions.length > 0 && (
             <div className="rounded-2xl bg-[#0f0f0f] border border-stone-800 divide-y divide-stone-800 overflow-hidden shadow-2xl">
               {textSuggestions.map((perfume) => {
-                const bottlePhoto = getPerfumeBottlePhoto(perfume.name, perfume.gender, perfume.image);
+                const bottlePhoto = getPerfumeBottlePhoto(perfume.name, perfume.gender, perfume.image, perfume.code);
                 return (
                   <div
                     key={perfume.id}
@@ -908,6 +908,7 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
                         <img
                           src={bottlePhoto}
                           alt={perfume.name}
+                          referrerPolicy="no-referrer"
                           className="w-full h-full object-contain"
                         />
                       </div>

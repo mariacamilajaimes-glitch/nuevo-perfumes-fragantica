@@ -1,5 +1,6 @@
 // Real photographic assets for fragrance notes, perfume bottles, brand logos, and main accords
 // Inspired directly by Fragrantica's official layout (as shown in user references)
+import { getFragranceBottlePhoto } from './fragranceBottleImages';
 
 export interface RealNoteVisual {
   name: string;
@@ -481,6 +482,54 @@ export const REAL_NOTE_PHOTOS: Record<string, RealNoteVisual> = {
     photoUrl: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=300&q=80',
     category: 'Aromáticas & Verdes',
     description: 'Hojas de té Sencha al vapor, sereno, zen, transparente y ligeramente ahumado.'
+  },
+  'Cedro': {
+    name: 'Cedro',
+    photoUrl: 'https://images.unsplash.com/photo-1546484396-fb3fc6f95f98?auto=format&fit=crop&w=300&q=80',
+    category: 'Maderas',
+    description: 'Virutas aromáticas de madera de cedro seco de Virginia, sobrio y arquitectónico.'
+  },
+  'Sándalo': {
+    name: 'Sándalo',
+    photoUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=300&q=80',
+    category: 'Maderas',
+    description: 'Madera de sándalo noble de Mysore, cremosa, láctea, suave y sagrada.'
+  },
+  'Canela': {
+    name: 'Canela',
+    photoUrl: 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=300&q=80',
+    category: 'Especias',
+    description: 'Ramas enrolladas de canela pura de Ceilán, cálida, dulce y envolvente.'
+  },
+  'Pimienta': {
+    name: 'Pimienta',
+    photoUrl: 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?auto=format&fit=crop&w=300&q=80',
+    category: 'Especias',
+    description: 'Granos de pimienta negra y rosa triturados, picante, vivaz y chispeante.'
+  },
+  'Frambuesa': {
+    name: 'Frambuesa',
+    photoUrl: 'https://images.unsplash.com/photo-1577069808027-142277d33b5c?auto=format&fit=crop&w=300&q=80',
+    category: 'Frutales',
+    description: 'Frambuesas rojas frescas y aterciopeladas, ácidas, jugosas y golosas.'
+  },
+  'Cereza': {
+    name: 'Cereza',
+    photoUrl: 'https://images.unsplash.com/photo-1528825871115-3581a5387919?auto=format&fit=crop&w=300&q=80',
+    category: 'Frutales',
+    description: 'Cerezas rojas oscuras maduras licorosas, profundas, dulces y seductoras.'
+  },
+  'Tabaco': {
+    name: 'Tabaco',
+    photoUrl: 'https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=300&q=80',
+    category: 'Cuero & Resinas',
+    description: 'Hojas aromáticas de tabaco rubio curado con matices de miel y heno seco.'
+  },
+  'Romero': {
+    name: 'Romero',
+    photoUrl: 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?auto=format&fit=crop&w=300&q=80',
+    category: 'Aromáticas & Verdes',
+    description: 'Ramitas de romero silvestre mediterráneo, herbal, alcanforado y tónico.'
   }
 };
 
@@ -497,12 +546,12 @@ export const CATEGORY_FALLBACK_PHOTOS: Record<string, string> = {
   'Cuero & Resinas': 'https://images.unsplash.com/photo-1519750783826-e2420f4d687f?auto=format&fit=crop&w=300&q=80'
 };
 
-// Helper to determine the real photo URL of any note in the catalog
+// Helper to determine the authentic real photo URL of any note with precise visual alignment
 export function getRealNotePhoto(noteName: string): { photoUrl: string; category: string; description: string } {
   const trimmed = noteName.trim();
   const lower = trimmed.toLowerCase();
 
-  // 1. Direct match
+  // 1. Direct match in dictionary
   if (REAL_NOTE_PHOTOS[trimmed]) {
     return REAL_NOTE_PHOTOS[trimmed];
   }
@@ -514,33 +563,92 @@ export function getRealNotePhoto(noteName: string): { photoUrl: string; category
     }
   }
 
-  // 3. Keyword matching for synonyms and compound notes
-  if (lower.includes('rosa')) {
+  // 3. Precise individual ingredient matching
+  // --- FRUTAS ESPECÍFICAS ---
+  if (lower.includes('sandía') || lower.includes('sandia')) {
     return {
-      photoUrl: REAL_NOTE_PHOTOS['Rosa'].photoUrl,
-      category: 'Florales',
-      description: `Nota de pétalos de rosa natural: ${trimmed}`
+      photoUrl: REAL_NOTE_PHOTOS['Sandía'].photoUrl,
+      category: 'Frutales',
+      description: `Rodajas frescas de sandía roja jugosa: ${trimmed}`
     };
   }
-  if (lower.includes('jazm') || lower.includes('hedione')) {
+  if (lower.includes('manzana')) {
     return {
-      photoUrl: REAL_NOTE_PHOTOS['Jazmín'].photoUrl,
-      category: 'Florales',
-      description: `Nota floral de jazmín blanco natural: ${trimmed}`
+      photoUrl: REAL_NOTE_PHOTOS['Manzana'].photoUrl,
+      category: 'Frutales',
+      description: `Mitades de manzana verde crujiente: ${trimmed}`
     };
   }
-  if (lower.includes('vainill')) {
+  if (lower.includes('fresa')) {
     return {
-      photoUrl: REAL_NOTE_PHOTOS['Vainilla'].photoUrl,
-      category: 'Gourmand & Dulces',
-      description: `Vainas aromáticas de vainilla natural: ${trimmed}`
+      photoUrl: REAL_NOTE_PHOTOS['Fresa'].photoUrl,
+      category: 'Frutales',
+      description: `Fresas rojas naturales aromáticas: ${trimmed}`
     };
   }
-  if (lower.includes('limón') || lower.includes('limon') || lower.includes('cítric') || lower.includes('citric') || lower.includes('bergamot')) {
+  if (lower.includes('pera')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Pera'].photoUrl,
+      category: 'Frutales',
+      description: `Pera Williams dulce cortada: ${trimmed}`
+    };
+  }
+  if (lower.includes('coco')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Coco'].photoUrl,
+      category: 'Frutales',
+      description: `Coco natural abierto con pulpa fresca: ${trimmed}`
+    };
+  }
+  if (lower.includes('frambues') || lower.includes('mora') || lower.includes('cassis') || lower.includes('grosell')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Frambuesa'] ? REAL_NOTE_PHOTOS['Frambuesa'].photoUrl : REAL_NOTE_PHOTOS['Frutos Rojos / Frutas'].photoUrl,
+      category: 'Frutales',
+      description: `Frutos rojos y bayas silvestres fragantes: ${trimmed}`
+    };
+  }
+  if (lower.includes('cereza') || lower.includes('cherry')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Cereza'].photoUrl,
+      category: 'Frutales',
+      description: `Cerezas rojas oscuras maduras: ${trimmed}`
+    };
+  }
+  if (lower.includes('piña') || lower.includes('pina')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Piña'].photoUrl,
+      category: 'Frutales',
+      description: `Piña tropical dorada y jugosa: ${trimmed}`
+    };
+  }
+  if (lower.includes('melocotón') || lower.includes('durazno')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Melocotón'].photoUrl,
+      category: 'Frutales',
+      description: `Durazno y melocotón almibarado: ${trimmed}`
+    };
+  }
+  if (lower.includes('maracuyá') || lower.includes('maracuya')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Maracuyá'].photoUrl,
+      category: 'Frutales',
+      description: `Fruta de la pasión exótica y cítrica: ${trimmed}`
+    };
+  }
+
+  // --- CÍTRICOS ESPECÍFICOS ---
+  if (lower.includes('limón') || lower.includes('limon') || lower.includes('lemon')) {
     return {
       photoUrl: REAL_NOTE_PHOTOS['Limón / Cítricos'].photoUrl,
       category: 'Cítricos',
-      description: `Cítrico fresco de alta difusión: ${trimmed}`
+      description: `Limón amarillo natural recién cortado: ${trimmed}`
+    };
+  }
+  if (lower.includes('bergamot')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Bergamota'].photoUrl,
+      category: 'Cítricos',
+      description: `Bergamota noble de Calabria fresca: ${trimmed}`
     };
   }
   if (lower.includes('naranj') || lower.includes('mandarin') || lower.includes('tangerin')) {
@@ -550,75 +658,267 @@ export function getRealNotePhoto(noteName: string): { photoUrl: string; category
       description: `Cítrico jugoso de naranja o mandarina: ${trimmed}`
     };
   }
-  if (lower.includes('madera') || lower.includes('cedro') || lower.includes('sándal') || lower.includes('sandal')) {
+  if (lower.includes('pomelo') || lower.includes('toronja')) {
     return {
-      photoUrl: REAL_NOTE_PHOTOS['Maderas (Cedro/Sándalo)'].photoUrl,
-      category: 'Maderas',
-      description: `Maderas aromáticas nobles y secas: ${trimmed}`
+      photoUrl: REAL_NOTE_PHOTOS['Pomelo / Toronja'].photoUrl,
+      category: 'Cítricos',
+      description: `Pomelo rosado efervescente: ${trimmed}`
     };
   }
-  if (lower.includes('almizcle') || lower.includes('musk')) {
+  if (lower.includes('lima')) {
     return {
-      photoUrl: REAL_NOTE_PHOTOS['Almizcle'].photoUrl,
-      category: 'Cuero & Resinas',
-      description: `Almizcle sedoso y limpio de fijación noble: ${trimmed}`
+      photoUrl: REAL_NOTE_PHOTOS['Lima'].photoUrl,
+      category: 'Cítricos',
+      description: `Lima verde cortada al momento: ${trimmed}`
+    };
+  }
+
+  // --- FLORALES ESPECÍFICOS ---
+  if (lower.includes('rosa') || lower.includes('rose')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Rosa'].photoUrl,
+      category: 'Florales',
+      description: `Pétalos de rosa natural aterciopelada: ${trimmed}`
+    };
+  }
+  if (lower.includes('jazm') || lower.includes('hedione')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Jazmín'].photoUrl,
+      category: 'Florales',
+      description: `Flores blancas de jazmín sambac: ${trimmed}`
+    };
+  }
+  if (lower.includes('lavanda')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Lavanda'].photoUrl,
+      category: 'Florales',
+      description: `Espigas de lavanda silvestre provenzal: ${trimmed}`
+    };
+  }
+  if (lower.includes('peoní') || lower.includes('peonia')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Peonía'].photoUrl,
+      category: 'Florales',
+      description: `Floración etérea de peonía rosada: ${trimmed}`
+    };
+  }
+  if (lower.includes('iris') || lower.includes('orris')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Iris'].photoUrl,
+      category: 'Florales',
+      description: `Rizoma de iris noble atalcado: ${trimmed}`
+    };
+  }
+  if (lower.includes('violeta')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Violeta'].photoUrl,
+      category: 'Florales',
+      description: `Pétalos silvestres de violeta: ${trimmed}`
+    };
+  }
+  if (lower.includes('azahar') || lower.includes('neroli')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Flor de Azahar'].photoUrl,
+      category: 'Florales',
+      description: `Flores de azahar de naranjo amargo: ${trimmed}`
+    };
+  }
+  if (lower.includes('gardenia')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Gardenia'].photoUrl,
+      category: 'Florales',
+      description: `Pétalos de gardenia blanca cremosa: ${trimmed}`
+    };
+  }
+  if (lower.includes('tuberosa') || lower.includes('nardo')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Tuberosa / Nardo'].photoUrl,
+      category: 'Florales',
+      description: `Tuberosa blanca narcótica y opulenta: ${trimmed}`
+    };
+  }
+  if (lower.includes('tiaré') || lower.includes('tiare')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Flor de tiaré'].photoUrl,
+      category: 'Florales',
+      description: `Flor sagrada de tiaré de Tahití: ${trimmed}`
+    };
+  }
+
+  // --- DULCES & GOURMAND ---
+  if (lower.includes('vainill') || lower.includes('vanilla')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Vainilla'].photoUrl,
+      category: 'Gourmand & Dulces',
+      description: `Vainas aromáticas de vainilla Bourbon de Madagascar: ${trimmed}`
+    };
+  }
+  if (lower.includes('caramel')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Caramelo / Dulces'].photoUrl,
+      category: 'Gourmand & Dulces',
+      description: `Caramelo dorado mantecoso fundido: ${trimmed}`
+    };
+  }
+  if (lower.includes('praliné') || lower.includes('praline')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Praliné'].photoUrl,
+      category: 'Gourmand & Dulces',
+      description: `Bombón praliné de avellanas y chocolate: ${trimmed}`
+    };
+  }
+  if (lower.includes('café') || lower.includes('cafe')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Café'].photoUrl,
+      category: 'Gourmand & Dulces',
+      description: `Granos enteros tostados de café arábica: ${trimmed}`
+    };
+  }
+  if (lower.includes('cacao') || lower.includes('chocolat')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Cacao / Chocolate'].photoUrl,
+      category: 'Gourmand & Dulces',
+      description: `Cacao puro y chocolate oscuro: ${trimmed}`
+    };
+  }
+  if (lower.includes('tonka')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Haba Tonka'].photoUrl,
+      category: 'Gourmand & Dulces',
+      description: `Semillas oscuras de haba tonka con cumarina: ${trimmed}`
+    };
+  }
+  if (lower.includes('miel')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Miel'].photoUrl,
+      category: 'Gourmand & Dulces',
+      description: `Miel dorada pura y viscosa: ${trimmed}`
+    };
+  }
+
+  // --- MADERAS & RESINAS ---
+  if (lower.includes('cedro') || lower.includes('cedar')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Cedro'].photoUrl,
+      category: 'Maderas',
+      description: `Madera noble de cedro aromático seco: ${trimmed}`
+    };
+  }
+  if (lower.includes('sándal') || lower.includes('sandal')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Sándalo'].photoUrl,
+      category: 'Maderas',
+      description: `Madera de sándalo noble cremosa: ${trimmed}`
+    };
+  }
+  if (lower.includes('pachul') || lower.includes('patchouli')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Pachulí'].photoUrl,
+      category: 'Maderas',
+      description: `Hojas de patchouli fermentadas y terrosas: ${trimmed}`
+    };
+  }
+  if (lower.includes('vetiver')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Vetiver'].photoUrl,
+      category: 'Maderas',
+      description: `Raíces terrosas y ahumadas de vetiver: ${trimmed}`
+    };
+  }
+  if (lower.includes('oud') || lower.includes('agarwood')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Oud'].photoUrl,
+      category: 'Maderas',
+      description: `Madera de agar resinosa sagrada de Oriente: ${trimmed}`
     };
   }
   if (lower.includes('ámbar') || lower.includes('ambar') || lower.includes('amber')) {
     return {
       photoUrl: REAL_NOTE_PHOTOS['Ámbar'].photoUrl,
       category: 'Cuero & Resinas',
-      description: `Resina ambarina dorada y cálida: ${trimmed}`
+      description: `Gema de resina fósil ambarina dorada: ${trimmed}`
+    };
+  }
+  if (lower.includes('almizcle') || lower.includes('musk')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Almizcle'].photoUrl,
+      category: 'Cuero & Resinas',
+      description: `Almizcle blanco puro y sedoso: ${trimmed}`
     };
   }
   if (lower.includes('cuero') || lower.includes('leather')) {
     return {
       photoUrl: REAL_NOTE_PHOTOS['Cuero'].photoUrl,
       category: 'Cuero & Resinas',
-      description: `Acorde de cuero sobrio y distinguido: ${trimmed}`
+      description: `Piel de cuero curtido elegante: ${trimmed}`
     };
   }
-  if (lower.includes('especi') || lower.includes('pimient') || lower.includes('canela')) {
+  if (lower.includes('tabaco')) {
     return {
-      photoUrl: REAL_NOTE_PHOTOS['Especias (Canela/Pimienta)'].photoUrl,
-      category: 'Especias',
-      description: `Especias aromáticas cálidas y vivas: ${trimmed}`
-    };
-  }
-  if (lower.includes('café') || lower.includes('cafe') || lower.includes('cacao') || lower.includes('chocolat')) {
-    return {
-      photoUrl: REAL_NOTE_PHOTOS['Café'].photoUrl,
-      category: 'Gourmand & Dulces',
-      description: `Acorde tostado y dulce de café o cacao: ${trimmed}`
-    };
-  }
-  if (lower.includes('pera') || lower.includes('manzana') || lower.includes('fresa') || lower.includes('sandía') || lower.includes('fruta') || lower.includes('piña')) {
-    return {
-      photoUrl: REAL_NOTE_PHOTOS['Pera'].photoUrl,
-      category: 'Frutales',
-      description: `Nota frutal fresca y jugosa: ${trimmed}`
-    };
-  }
-  if (lower.includes('mar') || lower.includes('acuát') || lower.includes('acuat') || lower.includes('marina') || lower.includes('calone')) {
-    return {
-      photoUrl: REAL_NOTE_PHOTOS['Notas Marinas / Acuáticas'].photoUrl,
-      category: 'Acuáticas & Frescas',
-      description: `Acorde acuático y ozónico refrescante: ${trimmed}`
-    };
-  }
-  if (lower.includes('menta') || lower.includes('hierba') || lower.includes('verde') || lower.includes('pino')) {
-    return {
-      photoUrl: REAL_NOTE_PHOTOS['Hierbas Verdes'].photoUrl,
-      category: 'Aromáticas & Verdes',
-      description: `Acorde verde y herbal de bosque fresco: ${trimmed}`
+      photoUrl: REAL_NOTE_PHOTOS['Tabaco'].photoUrl,
+      category: 'Cuero & Resinas',
+      description: `Hojas aromáticas de tabaco rubio curado: ${trimmed}`
     };
   }
 
-  // Fallback to floral or woody generic
+  // --- ESPECIAS ---
+  if (lower.includes('canela')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Canela'].photoUrl,
+      category: 'Especias',
+      description: `Ramas de canela pura aromática: ${trimmed}`
+    };
+  }
+  if (lower.includes('pimient')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Pimienta'].photoUrl,
+      category: 'Especias',
+      description: `Granos enteros de pimienta aromática: ${trimmed}`
+    };
+  }
+  if (lower.includes('cardamom')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Cardamomo'].photoUrl,
+      category: 'Especias',
+      description: `Vainas verdes aromáticas de cardamomo: ${trimmed}`
+    };
+  }
+  if (lower.includes('jengibre')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Jengibre'].photoUrl,
+      category: 'Especias',
+      description: `Raíz fresca de jengibre especiado: ${trimmed}`
+    };
+  }
+
+  // --- ACUÁTICAS & VERDES ---
+  if (lower.includes('sal')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['sal de mar'].photoUrl,
+      category: 'Acuáticas & Frescas',
+      description: `Cristales minerales de sal marina: ${trimmed}`
+    };
+  }
+  if (lower.includes('mar') || lower.includes('acuát') || lower.includes('acuat') || lower.includes('agua') || lower.includes('calone')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Notas Marinas / Acuáticas'].photoUrl,
+      category: 'Acuáticas & Frescas',
+      description: `Olas marinas y brisa oceánica refrescante: ${trimmed}`
+    };
+  }
+  if (lower.includes('menta')) {
+    return {
+      photoUrl: REAL_NOTE_PHOTOS['Menta Fresca'].photoUrl,
+      category: 'Aromáticas & Verdes',
+      description: `Hojas verdes de menta fresca: ${trimmed}`
+    };
+  }
+
+  // Category fallback
   return {
     photoUrl: CATEGORY_FALLBACK_PHOTOS['Florales'],
     category: 'Florales',
-    description: `Nota olfativa natural del catálogo Fraganza: ${trimmed}`
+    description: `Nota botánica natural del catálogo Fraganza: ${trimmed}`
   };
 }
 
@@ -762,10 +1062,21 @@ export const LUXURY_BOTTLE_PHOTOS: Record<string, string> = {
   'Acqua Di Gio': 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80'
 };
 
-export function getPerfumeBottlePhoto(perfumeName: string, gender: string, existingImage?: string): string {
+export function getPerfumeBottlePhoto(
+  perfumeNameOrCode: string,
+  gender: string = 'Unisex',
+  existingImage?: string,
+  code?: string
+): string {
+  const targetId = code || perfumeNameOrCode;
+  const catalogBottle = getFragranceBottlePhoto(targetId, gender, existingImage);
+  if (catalogBottle) {
+    return catalogBottle;
+  }
+
   // Check exact custom bottle
   for (const [key, url] of Object.entries(LUXURY_BOTTLE_PHOTOS)) {
-    if (perfumeName.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(perfumeName.toLowerCase())) {
+    if (perfumeNameOrCode.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(perfumeNameOrCode.toLowerCase())) {
       return url;
     }
   }

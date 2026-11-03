@@ -4,6 +4,7 @@ import { SmartQuiz } from './components/SmartQuiz';
 import { AdvancedSearch } from './components/AdvancedSearch';
 import { FamilyExplorer } from './components/FamilyExplorer';
 import { FragranceModal } from './components/FragranceModal';
+import { OfficialCatalogView } from './components/OfficialCatalogView';
 import { SupabaseDrawer } from './components/SupabaseDrawer';
 import { AdminAuthModal } from './components/AdminAuthModal';
 import { getPerfumeBottlePhoto } from './data/fragranceVisuals';
@@ -310,98 +311,13 @@ export default function App() {
           />
         )}
 
-        {/* Catalog Tab (All 207 perfumes) */}
+        {/* Catalog Tab (All 207 perfumes with Gender filtering and authentic bottle photos) */}
         {activeTab === 'catalog' && (
-          <div className="space-y-8">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-              <div>
-                <span className="text-xs uppercase tracking-widest text-[#C9A84C] font-semibold block mb-1">
-                  Inventario Completo Oficial
-                </span>
-                <h2 className="text-3xl font-bold font-serif-luxury text-stone-100">
-                  Catálogo de Fragancias (207 Referencias)
-                </h2>
-                <p className="text-stone-400 text-sm mt-1">
-                  Damas (D-001 a D-105), Caballeros (C-001 a C-074) y Unisex (U-001 a U-028).
-                </p>
-              </div>
-              <div className="text-xs text-stone-400 bg-[#121212] px-4 py-2 rounded-xl border border-stone-800">
-                Total: <span className="text-[#F0D080] font-bold">{CATALOG.length}</span> perfumes registrados
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {CATALOG.map((perfume) => {
-                const isFav = favorites.includes(perfume.id);
-                return (
-                  <div
-                    key={perfume.id}
-                    onClick={() => setSelectedFragrance(perfume)}
-                    className="bg-[#0e0e0e] rounded-2xl border border-stone-800 hover:border-[#C9A84C]/50 transition-all p-5 flex flex-col justify-between space-y-4 shadow-xl cursor-pointer group"
-                  >
-                    <div className="relative w-full h-52 rounded-2xl overflow-hidden bg-gradient-to-b from-stone-900 to-black border border-stone-800 p-2 flex items-center justify-center">
-                      <img
-                        src={getPerfumeBottlePhoto(perfume.name, perfume.gender, perfume.image)}
-                        alt={perfume.name}
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
-
-                      <div className="absolute top-2.5 left-2.5 bg-black/80 px-2.5 py-1 rounded-full text-[11px] font-mono font-bold text-[#F0D080] border border-[#C9A84C]/30">
-                        {perfume.code}
-                      </div>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleToggleFavorite(perfume.id);
-                        }}
-                        className="absolute top-2.5 right-2.5 p-2 rounded-full bg-black/80 border border-stone-700 text-stone-300 hover:text-rose-400"
-                      >
-                        <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-rose-500 text-rose-500' : ''}`} />
-                      </button>
-
-                      <div className="absolute bottom-2.5 left-3 right-3">
-                        <span className="text-[10px] uppercase tracking-wider text-[#C9A84C] font-semibold block">
-                          {perfume.brand}
-                        </span>
-                        <h4 className="text-lg font-bold font-serif-luxury text-stone-100 truncate group-hover:text-[#F0D080] transition-colors">
-                          {perfume.name}
-                        </h4>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap gap-1">
-                        <span className="px-2 py-0.5 rounded text-[10px] bg-stone-900 text-stone-300 border border-stone-800">
-                          {perfume.gender}
-                        </span>
-                        <span className="px-2 py-0.5 rounded text-[10px] bg-stone-900 text-stone-300 border border-stone-800">
-                          {perfume.subfamily || perfume.family}
-                        </span>
-                        <span className="px-2 py-0.5 rounded text-[10px] bg-[#C9A84C]/10 text-[#F0D080] border border-[#C9A84C]/30">
-                          {perfume.intensity}
-                        </span>
-                      </div>
-
-                      <div className="p-2.5 rounded-xl bg-[#141414] border border-stone-800/80 text-[11px] text-stone-400">
-                        <span className="text-stone-300 font-semibold">Salida: </span>
-                        {perfume.pyramid.top.join(', ')}
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-stone-800 flex justify-between items-center text-xs">
-                      <span className="text-stone-500">{perfume.skinCompat}</span>
-                      <span className="text-[#F0D080] font-semibold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                        Ver Ficha y Similares <ChevronRight className="w-3.5 h-3.5" />
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <OfficialCatalogView
+            onSelectFragrance={(perfume) => setSelectedFragrance(perfume)}
+            favorites={favorites}
+            onToggleFavorite={handleToggleFavorite}
+          />
         )}
 
         {/* Favorites Tab */}
@@ -439,8 +355,9 @@ export default function App() {
                   >
                     <div className="relative w-full h-48 rounded-2xl overflow-hidden bg-gradient-to-b from-stone-900 to-black border border-stone-800 p-2 flex items-center justify-center">
                       <img
-                        src={getPerfumeBottlePhoto(perfume.name, perfume.gender, perfume.image)}
+                        src={getPerfumeBottlePhoto(perfume.name, perfume.gender, perfume.image, perfume.code)}
                         alt={perfume.name}
+                        referrerPolicy="no-referrer"
                         className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute top-2.5 left-2.5 bg-black/80 px-2.5 py-1 rounded-full text-[11px] font-mono font-bold text-[#F0D080]">

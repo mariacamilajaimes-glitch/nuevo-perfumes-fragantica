@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { CatalogFragrance, findSimilarFragrances, getOccasionDescription, getFullFragranceReview } from '../data/fraganzaCatalog';
+import {
+  CatalogFragrance,
+  findSimilarFragrancesJaccard,
+  TieredJaccardResult,
+  getOccasionDescription,
+  getFullFragranceReview
+} from '../data/fraganzaCatalog';
 import {
   getRealNotePhoto,
   computeFragranticaAccords,
@@ -18,7 +24,9 @@ import {
   Clock,
   Compass,
   Droplets,
-  Wind
+  Wind,
+  Percent,
+  Calculator
 } from 'lucide-react';
 
 interface FragranceModalProps {
@@ -40,8 +48,8 @@ export const FragranceModal: React.FC<FragranceModalProps> = ({
 
   if (!fragrance) return null;
 
-  // Similar perfumes (always visible, sharing at least 2 notes)
-  const similarItems = findSimilarFragrances(fragrance, 4);
+  // Similar perfumes calculated using Weighted Jaccard Similarity (Salida 25%, Corazón 35%, Fondo 40%)
+  const similarItems: TieredJaccardResult[] = findSimilarFragrancesJaccard(fragrance, 4);
 
   // Fragrantica Accords
   const mainAccords = computeFragranticaAccords(
@@ -59,7 +67,7 @@ export const FragranceModal: React.FC<FragranceModalProps> = ({
     textColor: '#1a1a1a'
   };
 
-  const bottlePhoto = getPerfumeBottlePhoto(fragrance.name, fragrance.gender, fragrance.image);
+  const bottlePhoto = getPerfumeBottlePhoto(fragrance.name, fragrance.gender, fragrance.image, fragrance.code);
 
   // Intensity meter values (Fragrantica style)
   const intensityLevels = [
@@ -379,66 +387,197 @@ export const FragranceModal: React.FC<FragranceModalProps> = ({
             </div>
           </div>
 
-          {/* PERFUMES SIMILARES (SIEMPRE VISIBLES - Mínimo 2 notas en común) */}
-          <div className="space-y-4 pt-4 border-t border-stone-800">
-            <div className="flex items-center justify-between">
+          {/* PERFUMES SIMILARES: ALGORITMO JACCARD PONDERADO (SALIDA 25%, CORAZÓN 35%, FONDO 40%) */}
+          <div className="space-y-4 pt-6 border-t border-stone-800">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h4 className="text-lg font-bold font-serif-luxury text-stone-100 flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-[#F0D080]" />
-                  Perfumes Similares en el Catálogo
+                  Fragancias Similares (Similitud Jaccard Ponderada)
                 </h4>
-                <p className="text-xs text-stone-400">
-                  Comparten al menos 2 notas olfativas clave con {fragrance.name}.
+                <p className="text-xs text-stone-400 mt-0.5">
+                  Calculado mediante intersección y unión ponderada por niveles de pirámide: Salida (25%), Corazón (35%) y Fondo (40%).
                 </p>
               </div>
-              <span className="text-xs font-mono text-[#F0D080]">
-                {similarItems.length} opciones
-              </span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#181818] border border-[#C9A84C]/40 text-[11px] font-mono text-[#F0D080] self-start sm:self-auto">
+                <Calculator className="w-3.5 h-3.5" />
+                <span>Jaccard Ponderado</span>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {similarItems.map(({ fragrance: sim, sharedNotes }) => {
-                const simBottle = getPerfumeBottlePhoto(sim.name, sim.gender, sim.image);
-                return (
-                  <div
-                    key={sim.id}
-                    onClick={() => onSelectAnother(sim)}
-                    className="p-3.5 rounded-2xl bg-[#121212] border border-stone-800 hover:border-[#C9A84C]/60 cursor-pointer group transition-all flex flex-col justify-between space-y-3"
-                  >
-                    <div className="relative aspect-square rounded-xl bg-black border border-stone-800 p-2 overflow-hidden flex items-center justify-center">
-                      <img
-                        src={simBottle}
-                        alt={sim.name}
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform"
-                      />
-                      <span className="absolute top-2 left-2 text-[10px] font-mono px-2 py-0.5 rounded bg-black/80 text-[#F0D080] border border-stone-800 font-bold">
-                        {sim.code}
-                      </span>
-                    </div>
+            {similarItems.length === 0 ? (
+              <div className="p-6 text-center rounded-2xl bg-[#121212] border border-stone-800 text-xs text-stone-400">
+                No hay otras fragancias en este rango con afinidad de notas compartidas suficientes.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {similarItems.map(({ fragrance: sim, jaccardPercentage, sharedTopNotes, sharedHeartNotes, sharedBaseNotes, allSharedNotes }) => {
+                  const simBottle = getPerfumeBottlePhoto(sim.name, sim.gender, sim.image, sim.code);
+                  return (
+                    <div
+                      key={sim.id}
+                      onClick={() => onSelectAnother(sim)}
+                      className="p-3.5 rounded-2xl bg-[#121212] border border-stone-800 hover:border-[#C9A84C] cursor-pointer group transition-all flex flex-col justify-between space-y-3 relative overflow-hidden"
+                    >
+                      {/* Jaccard Match Score Pill */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/80 text-[#F0D080] border border-stone-800 font-bold">
+                          {sim.code}
+                        </span>
+                        <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#1e1708] border border-[#C9A84C]/60 text-[11px] font-bold text-[#F0D080]">
+                          <Sparkles className="w-2.5 h-2.5 text-[#F0D080]" />
+                          <span>{jaccardPercentage}%</span>
+                        </div>
+                      </div>
 
-                    <div>
-                      <span className="text-[10px] uppercase text-stone-400 block truncate">
-                        {sim.brand}
-                      </span>
-                      <h5 className="font-bold text-xs text-stone-100 truncate group-hover:text-[#F0D080]">
-                        {sim.name}
-                      </h5>
-                      <span className="text-[10px] text-stone-400 truncate block mt-0.5">
-                        {sim.family}
-                      </span>
-                    </div>
+                      {/* Flacon bottle real photo */}
+                      <div className="relative aspect-square rounded-xl bg-gradient-to-b from-stone-900 to-black border border-stone-800/80 p-2 overflow-hidden flex items-center justify-center">
+                        <img
+                          src={simBottle}
+                          alt={sim.name}
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-contain group-hover:scale-108 transition-transform duration-300"
+                        />
+                        <span className={`absolute bottom-1.5 right-1.5 text-[9px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider ${
+                          sim.gender === 'Dama'
+                            ? 'bg-rose-950/90 text-rose-200 border border-rose-800'
+                            : sim.gender === 'Caballero'
+                            ? 'bg-blue-950/90 text-blue-200 border border-blue-800'
+                            : 'bg-amber-950/90 text-amber-200 border border-amber-800'
+                        }`}>
+                          {sim.gender}
+                        </span>
+                      </div>
 
-                    <div className="pt-2 border-t border-stone-800/80">
-                      <span className="text-[10px] text-[#F0D080] block font-medium truncate">
-                        Comparte: {sharedNotes.slice(0, 2).join(', ')}
-                      </span>
+                      {/* Name & Brand */}
+                      <div>
+                        <span className="text-[10px] uppercase tracking-wider text-stone-400 block truncate">
+                          {sim.brand}
+                        </span>
+                        <h5 className="font-bold text-xs text-stone-100 truncate group-hover:text-[#F0D080]">
+                          {sim.name}
+                        </h5>
+                        <span className="text-[10px] text-stone-400 truncate block mt-0.5">
+                          {sim.family}
+                        </span>
+                      </div>
+
+                      {/* Tiered Jaccard Progress Bar */}
+                      <div className="space-y-1">
+                        <div className="w-full h-1.5 bg-stone-900 rounded-full overflow-hidden border border-stone-800">
+                          <div
+                            className="h-full bg-gradient-to-r from-[#C9A84C] to-[#F0D080] rounded-full transition-all duration-500"
+                            style={{ width: `${Math.min(100, Math.max(15, jaccardPercentage))}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Shared Notes by Tier */}
+                      <div className="pt-2 border-t border-stone-800/80 space-y-1 text-[10px]">
+                        {sharedTopNotes.length > 0 && (
+                          <div className="flex items-start gap-1 text-stone-300">
+                            <span className="text-[#F0D080] font-semibold shrink-0">Salida:</span>
+                            <span className="truncate text-stone-400">{sharedTopNotes.join(', ')}</span>
+                          </div>
+                        )}
+                        {sharedHeartNotes.length > 0 && (
+                          <div className="flex items-start gap-1 text-stone-300">
+                            <span className="text-rose-400 font-semibold shrink-0">Corazón:</span>
+                            <span className="truncate text-stone-400">{sharedHeartNotes.join(', ')}</span>
+                          </div>
+                        )}
+                        {sharedBaseNotes.length > 0 && (
+                          <div className="flex items-start gap-1 text-stone-300">
+                            <span className="text-amber-400 font-semibold shrink-0">Fondo:</span>
+                            <span className="truncate text-stone-400">{sharedBaseNotes.join(', ')}</span>
+                          </div>
+                        )}
+                        {allSharedNotes.length === 0 && (
+                          <span className="text-stone-500 italic block">Similitud por familia y acordes</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
+
+        {/* INGREDIENT DETAIL POPUP MODAL (REAL BOTANICAL PHOTOGRAPHY) */}
+        {selectedNotePopup && (() => {
+          const noteVisual = getRealNotePhoto(selectedNotePopup);
+          const isTop = fragrance.pyramid.top.includes(selectedNotePopup);
+          const isHeart = fragrance.pyramid.heart.includes(selectedNotePopup);
+          const isBase = fragrance.pyramid.base.includes(selectedNotePopup);
+
+          return (
+            <div
+              className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-150"
+              onClick={() => setSelectedNotePopup(null)}
+            >
+              <div
+                className="relative w-full max-w-sm bg-[#121212] border border-[#C9A84C]/50 rounded-3xl p-6 shadow-2xl space-y-4"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  onClick={() => setSelectedNotePopup(null)}
+                  className="absolute top-4 right-4 p-1.5 text-stone-400 hover:text-stone-100 bg-stone-900 rounded-full border border-stone-800"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+
+                <div className="w-24 h-24 mx-auto rounded-2xl bg-white p-1.5 shadow-xl overflow-hidden border border-stone-700">
+                  <img
+                    src={noteVisual.photoUrl}
+                    alt={selectedNotePopup}
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover rounded-xl"
+                  />
+                </div>
+
+                <div className="text-center space-y-1">
+                  <span className="text-[10px] uppercase font-mono tracking-wider px-2.5 py-0.5 rounded-full bg-stone-900 border border-stone-800 text-[#F0D080]">
+                    {noteVisual.category}
+                  </span>
+                  <h4 className="text-xl font-bold font-serif-luxury text-stone-100 capitalize">
+                    {selectedNotePopup}
+                  </h4>
+                  <div className="flex justify-center gap-1.5 pt-1 text-[11px]">
+                    {isTop && (
+                      <span className="px-2 py-0.5 rounded bg-stone-900 border border-[#F0D080]/40 text-[#F0D080] font-semibold">
+                        Salida (Top)
+                      </span>
+                    )}
+                    {isHeart && (
+                      <span className="px-2 py-0.5 rounded bg-stone-900 border border-rose-500/40 text-rose-300 font-semibold">
+                        Corazón (Heart)
+                      </span>
+                    )}
+                    {isBase && (
+                      <span className="px-2 py-0.5 rounded bg-stone-900 border border-amber-500/40 text-amber-300 font-semibold">
+                        Fondo (Base)
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <p className="text-xs text-stone-300 leading-relaxed text-center bg-black/40 p-3 rounded-xl border border-stone-800">
+                  {noteVisual.description}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedNotePopup(null)}
+                  className="w-full py-2 rounded-xl bg-gradient-to-r from-[#A07830] to-[#C9A84C] text-stone-950 font-bold text-xs uppercase tracking-wider hover:brightness-110 transition"
+                >
+                  Cerrar Ficha
+                </button>
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
